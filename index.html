@@ -90,7 +90,7 @@
             font-weight: bold;
         }
 
-        /* Время */
+        /* Общие стили времени */
         .time-wrapper {
             display: flex;
             gap: 15px;
@@ -98,13 +98,45 @@
         }
         .time-box {
             flex: 1;
+            background: #fff;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
-        .time-box label {
-            margin-top: 0;
-            font-weight: normal;
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 5px;
+        .time-box span, .time-box label { 
+            margin: 0;
+            font-weight: bold; 
+            color: #555; 
+            font-size: 14px;
+        }
+        .time-box select { 
+            width: auto; 
+            margin: 0; 
+            padding: 8px 10px;
+            background: #fafafa;
+        }
+        .time-box input[type="time"] {
+            margin: 0;
+            padding: 8px;
+            width: 100%;
+        }
+
+        /* Адаптивное отображение времени */
+        .mobile-time { display: none; }
+        .desktop-time { display: flex; }
+
+        @media (max-width: 768px) {
+            .desktop-time { display: none !important; }
+            .mobile-time { display: flex !important; }
+            .time-box { flex-direction: column; align-items: stretch; text-align: center; }
+            .time-box label { margin-bottom: 5px; }
+            .time-wrapper { gap: 10px; }
+            .form-container { padding: 20px 15px; }
+            h2 { font-size: 20px; }
         }
 
         button.action-btn { 
@@ -142,12 +174,6 @@
             content: "";
             clear: both;
             display: table;
-        }
-
-        @media (max-width: 480px) {
-            .form-container { padding: 20px 15px; }
-            h2 { font-size: 20px; }
-            .time-wrapper { gap: 10px; }
         }
     </style>
 </head>
@@ -217,13 +243,22 @@
             }
         }
 
+        const hOpts = [8,9,10,11,12,13,14,15,16,17,18,19,20,21].map(h => {
+            let val = h < 10 ? '0'+h : h;
+            return `<option value="${val}">${val}</option>`;
+        }).join('');
+        
+        const mOpts = ['00','05','10','15','20','25','30','35','40','45','50','55'].map(m => {
+            return `<option value="${m}">${m}</option>`;
+        }).join('');
+
         function getActivityHTML(isFirst) {
             return `
                 ${isFirst ? '' : '<button type="button" class="remove-btn" onclick="this.parentElement.remove()">✕ Удалить</button>'}
                 <label>Название кружка/секции:</label>
                 <input type="text" class="act-name" required placeholder="Например: Робототехника">
                 
-                <label>Дни недели:</label>
+                <label>Дни недели (выберите нужные):</label>
                 <div class="days-wrapper">
                     <label class="day-btn"><input type="checkbox" class="day-cb" value="Пн" onchange="toggleDay(this.parentElement)">Пн</label>
                     <label class="day-btn"><input type="checkbox" class="day-cb" value="Вт" onchange="toggleDay(this.parentElement)">Вт</label>
@@ -235,14 +270,31 @@
                 </div>
 
                 <label>Время проведения:</label>
-                <div class="time-wrapper">
+                <!-- Контейнер для ПК (Выпадающие списки) -->
+                <div class="time-wrapper desktop-time">
+                    <div class="time-box">
+                        <span>С</span>
+                        <select class="act-h-start">${hOpts}</select>
+                        <span>:</span>
+                        <select class="act-m-start">${mOpts}</select>
+                    </div>
+                    <div class="time-box">
+                        <span>ДО</span>
+                        <select class="act-h-end">${hOpts}</select>
+                        <span>:</span>
+                        <select class="act-m-end">${mOpts}</select>
+                    </div>
+                </div>
+
+                <!-- Контейнер для Мобильных устройств (Прокрутка) -->
+                <div class="time-wrapper mobile-time">
                     <div class="time-box">
                         <label>С:</label>
-                        <input type="time" class="act-time-start" required>
+                        <input type="time" class="act-time-start-mob">
                     </div>
                     <div class="time-box">
                         <label>ДО:</label>
-                        <input type="time" class="act-time-end" required>
+                        <input type="time" class="act-time-end-mob">
                     </div>
                 </div>
             `;
@@ -267,17 +319,48 @@
             
             const blocks = document.querySelectorAll('.activity-block');
             let hasTimeError = false;
+            let hasEmptyTimeError = false;
             let hasDayError = false;
             const activities = [];
 
+            // Проверяем ширину экрана для определения активных полей
+            const isMobile = window.innerWidth <= 768;
+
             blocks.forEach(block => {
-                const timeStart = block.querySelector('.act-time-start').value;
-                const timeEnd = block.querySelector('.act-time-end').value;
-                
-                if (timeStart && timeEnd) {
-                    if (timeEnd <= timeStart) {
-                        hasTimeError = true;
+                let timeStartStr = "";
+                let timeEndStr = "";
+                let startMinutes = 0;
+                let endMinutes = 0;
+
+                // Читаем данные из нужного блока в зависимости от устройства
+                if (isMobile) {
+                    const ts = block.querySelector('.act-time-start-mob').value;
+                    const te = block.querySelector('.act-time-end-mob').value;
+                    
+                    if (!ts || !te) {
+                        hasEmptyTimeError = true;
+                    } else {
+                        timeStartStr = ts;
+                        timeEndStr = te;
+                        const [sh, sm] = ts.split(':').map(Number);
+                        const [eh, em] = te.split(':').map(Number);
+                        startMinutes = (sh * 60) + sm;
+                        endMinutes = (eh * 60) + em;
                     }
+                } else {
+                    const hs = block.querySelector('.act-h-start').value;
+                    const ms = block.querySelector('.act-m-start').value;
+                    const he = block.querySelector('.act-h-end').value;
+                    const me = block.querySelector('.act-m-end').value;
+                    
+                    timeStartStr = `${hs}:${ms}`;
+                    timeEndStr = `${he}:${me}`;
+                    startMinutes = (parseInt(hs) * 60) + parseInt(ms);
+                    endMinutes = (parseInt(he) * 60) + parseInt(me);
+                }
+                
+                if (!hasEmptyTimeError && endMinutes <= startMinutes) {
+                    hasTimeError = true;
                 }
 
                 // Собираем отмеченные дни
@@ -289,12 +372,17 @@
                 activities.push({
                     name: block.querySelector('.act-name').value,
                     day: checkedDays.join(', '),
-                    time: `${timeStart} - ${timeEnd}`
+                    time: `${timeStartStr} - ${timeEndStr}`
                 });
             });
 
             if (hasDayError) {
                 alert('Ошибка: Пожалуйста, выберите хотя бы один день недели для каждого кружка (нажмите на кнопку дня).');
+                return;
+            }
+
+            if (hasEmptyTimeError) {
+                alert('Ошибка: Пожалуйста, укажите время начала и окончания для всех кружков.');
                 return;
             }
 
@@ -321,7 +409,6 @@
                 if(result.result === 'success') {
                     alert('Данные успешно отправлены! Спасибо.');
                     document.getElementById('surveyForm').reset();
-                    // Сбрасываем визуальное выделение дней
                     document.getElementById('activitiesContainer').innerHTML = `
                         <div class="activity-block clearfix">
                             ${getActivityHTML(true)}
