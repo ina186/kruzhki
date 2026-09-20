@@ -59,6 +59,33 @@
             background: #f8f9fa; 
         }
         
+        /* Стили для галочек дней недели */
+        .days-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 8px 0 10px 0;
+            background: #fff;
+            padding: 12px 15px;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+        }
+        .days-wrapper label {
+            margin-top: 0;
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        .days-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+        }
+
         .time-wrapper {
             display: flex;
             justify-content: space-between;
@@ -122,6 +149,7 @@
             .form-container { padding: 20px 15px; }
             h2 { font-size: 20px; }
             .time-wrapper { flex-direction: column; gap: 10px; }
+            .days-wrapper { gap: 10px; }
         }
     </style>
 </head>
@@ -196,16 +224,16 @@
                 <label>Название кружка/секции:</label>
                 <input type="text" class="act-name" required placeholder="Например: Робототехника">
                 
-                <label>День недели:</label>
-                <select class="act-day">
-                    <option value="Понедельник">Понедельник</option>
-                    <option value="Вторник">Вторник</option>
-                    <option value="Среда">Среда</option>
-                    <option value="Четверг">Четверг</option>
-                    <option value="Пятница">Пятница</option>
-                    <option value="Суббота">Суббота</option>
-                    <option value="Воскресенье">Воскресенье</option>
-                </select>
+                <label>Дни недели:</label>
+                <div class="days-wrapper">
+                    <label><input type="checkbox" class="day-cb" value="Пн"> Пн</label>
+                    <label><input type="checkbox" class="day-cb" value="Вт"> Вт</label>
+                    <label><input type="checkbox" class="day-cb" value="Ср"> Ср</label>
+                    <label><input type="checkbox" class="day-cb" value="Чт"> Чт</label>
+                    <label><input type="checkbox" class="day-cb" value="Пт"> Пт</label>
+                    <label><input type="checkbox" class="day-cb" value="Сб"> Сб</label>
+                    <label><input type="checkbox" class="day-cb" value="Вс"> Вс</label>
+                </div>
 
                 <label>Время проведения:</label>
                 <div class="time-wrapper">
@@ -244,21 +272,27 @@
             
             const blocks = document.querySelectorAll('.activity-block');
             let hasTimeError = false;
+            let hasDayError = false;
             const activities = [];
 
-            // Проверка времени перед отправкой
+            // Проверка времени и дней перед отправкой
             blocks.forEach(block => {
                 const hs = parseInt(block.querySelector('.act-h-start').value);
                 const ms = parseInt(block.querySelector('.act-m-start').value);
                 const he = parseInt(block.querySelector('.act-h-end').value);
                 const me = parseInt(block.querySelector('.act-m-end').value);
                 
-                // Переводим время в минуты от начала суток для удобного сравнения
                 const startMinutes = (hs * 60) + ms;
                 const endMinutes = (he * 60) + me;
 
                 if (endMinutes <= startMinutes) {
                     hasTimeError = true;
+                }
+
+                // Собираем отмеченные галочки дней недели
+                const checkedDays = Array.from(block.querySelectorAll('.day-cb:checked')).map(cb => cb.value);
+                if (checkedDays.length === 0) {
+                    hasDayError = true;
                 }
 
                 const hsStr = block.querySelector('.act-h-start').value;
@@ -268,14 +302,19 @@
 
                 activities.push({
                     name: block.querySelector('.act-name').value,
-                    day: block.querySelector('.act-day').value,
+                    day: checkedDays.join(', '),
                     time: `${hsStr}:${msStr} - ${heStr}:${meStr}`
                 });
             });
 
+            if (hasDayError) {
+                alert('Ошибка: Пожалуйста, выберите хотя бы один день недели для каждого кружка.');
+                return;
+            }
+
             if (hasTimeError) {
                 alert('Ошибка: Время окончания кружка должно быть позже времени начала. Пожалуйста, исправьте время.');
-                return; // Останавливаем отправку
+                return; 
             }
 
             const btn = e.target.querySelector('.submit-btn');
