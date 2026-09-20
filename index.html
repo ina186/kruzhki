@@ -59,7 +59,6 @@
             background: #f8f9fa; 
         }
         
-        /* Стили для удобного выбора времени через списки */
         .time-wrapper {
             display: flex;
             justify-content: space-between;
@@ -99,7 +98,7 @@
         .add-btn { background: #008CBA; margin-bottom: 25px; }
         .add-btn:hover { background: #007399; }
         
-        .submit-btn { background: #4CAF50; font-size: 18px; }
+        .submit-btn { background: #4CAF50; font-size: 16px; }
         .submit-btn:hover { background: #45a049; }
         
         .remove-btn { 
@@ -171,7 +170,7 @@
             </select>
 
             <div id="activitiesContainer">
-                <!-- Контейнер для кружков (основной блок загрузится через JavaScript ниже) -->
+                <!-- Контейнер для кружков -->
             </div>
 
             <button type="button" class="add-btn" onclick="addActivity()">+ Добавить еще кружок</button>
@@ -182,7 +181,6 @@
     <script>
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7DhiolXlYSY1gGMaOxJ2NjTDD0FAwAu4z3VrUgsIxgdov7MCpMugOIAyxgFg2csbG1A/exec';
 
-        // Генерируем опции для часов (с 08 до 21) и минут (каждые 5 минут)
         const hOpts = [8,9,10,11,12,13,14,15,16,17,18,19,20,21].map(h => {
             let val = h < 10 ? '0'+h : h;
             return `<option value="${val}">${val}</option>`;
@@ -192,7 +190,6 @@
             return `<option value="${m}">${m}</option>`;
         }).join('');
 
-        // HTML-шаблон для одного блока с кружком
         function getActivityHTML(isFirst) {
             return `
                 ${isFirst ? '' : '<button type="button" class="remove-btn" onclick="this.parentElement.remove()">✕ Удалить</button>'}
@@ -228,7 +225,6 @@
             `;
         }
 
-        // При загрузке страницы добавляем первый блок
         document.getElementById('activitiesContainer').innerHTML = `
             <div class="activity-block clearfix">
                 ${getActivityHTML(true)}
@@ -246,30 +242,48 @@
         document.getElementById('surveyForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const btn = e.target.querySelector('.submit-btn');
-            btn.innerText = 'Отправка...';
-            btn.disabled = true;
-            btn.style.opacity = '0.7';
-
-            const childName = document.getElementById('childName').value;
             const blocks = document.querySelectorAll('.activity-block');
+            let hasTimeError = false;
             const activities = [];
 
+            // Проверка времени перед отправкой
             blocks.forEach(block => {
-                // Склеиваем часы и минуты
-                const hs = block.querySelector('.act-h-start').value;
-                const ms = block.querySelector('.act-m-start').value;
-                const he = block.querySelector('.act-h-end').value;
-                const me = block.querySelector('.act-m-end').value;
-                const fullTime = `${hs}:${ms} - ${he}:${me}`;
+                const hs = parseInt(block.querySelector('.act-h-start').value);
+                const ms = parseInt(block.querySelector('.act-m-start').value);
+                const he = parseInt(block.querySelector('.act-h-end').value);
+                const me = parseInt(block.querySelector('.act-m-end').value);
+                
+                // Переводим время в минуты от начала суток для удобного сравнения
+                const startMinutes = (hs * 60) + ms;
+                const endMinutes = (he * 60) + me;
+
+                if (endMinutes <= startMinutes) {
+                    hasTimeError = true;
+                }
+
+                const hsStr = block.querySelector('.act-h-start').value;
+                const msStr = block.querySelector('.act-m-start').value;
+                const heStr = block.querySelector('.act-h-end').value;
+                const meStr = block.querySelector('.act-m-end').value;
 
                 activities.push({
                     name: block.querySelector('.act-name').value,
                     day: block.querySelector('.act-day').value,
-                    time: fullTime
+                    time: `${hsStr}:${msStr} - ${heStr}:${meStr}`
                 });
             });
 
+            if (hasTimeError) {
+                alert('Ошибка: Время окончания кружка должно быть позже времени начала. Пожалуйста, исправьте время.');
+                return; // Останавливаем отправку
+            }
+
+            const btn = e.target.querySelector('.submit-btn');
+            btn.innerText = 'Пожалуйста, подождите, ваш ответ сохраняется...';
+            btn.disabled = true;
+            btn.style.opacity = '0.7';
+
+            const childName = document.getElementById('childName').value;
             const data = { childName: childName, activities: activities };
 
             fetch(GOOGLE_SCRIPT_URL, {
