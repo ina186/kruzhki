@@ -35,7 +35,7 @@
             color: #444;
             font-size: 14px;
         }
-        input, select { 
+        input[type="text"], select { 
             width: 100%; 
             padding: 12px 15px; 
             margin: 8px 0 10px 0; 
@@ -46,7 +46,7 @@
             background-color: #fafafa;
             transition: border-color 0.2s;
         }
-        input:focus, select:focus {
+        input[type="text"]:focus, select:focus {
             outline: none;
             border-color: #008CBA;
             background-color: #fff;
@@ -59,19 +59,30 @@
             background: #f8f9fa; 
         }
         
-        /* Стили для двойного поля времени */
-        .time-container {
+        /* Стили для удобного выбора времени через списки */
+        .time-wrapper {
             display: flex;
+            justify-content: space-between;
             gap: 15px;
+            margin-top: 8px;
         }
-        .time-field {
+        .time-box {
             flex: 1;
+            background: #fff;
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
-        .time-field label {
-            margin-top: 5px;
-            font-weight: normal;
-            font-size: 13px;
-            color: #666;
+        .time-box span { font-weight: bold; color: #555; }
+        .time-box select { 
+            width: auto; 
+            margin: 0; 
+            padding: 8px 10px;
+            background: #fafafa;
         }
 
         button { 
@@ -111,8 +122,7 @@
         @media (max-width: 480px) {
             .form-container { padding: 20px 15px; }
             h2 { font-size: 20px; }
-            input, select, button { font-size: 16px; }
-            .time-container { gap: 10px; }
+            .time-wrapper { flex-direction: column; gap: 10px; }
         }
     </style>
 </head>
@@ -121,37 +131,47 @@
     <div class="form-container">
         <h2>Сбор данных по кружкам</h2>
         <form id="surveyForm">
-            <label>Имя и фамилия ребенка:</label>
-            <input type="text" id="childName" required placeholder="Например: Иванов Петя">
+            <label>Имя и фамилия ребенка (класс 3В):</label>
+            <select id="childName" required>
+                <option value="" disabled selected>Выберите ученика из списка...</option>
+                <option value="Акберов Бахтияр Ринатович">Акберов Бахтияр Ринатович</option>
+                <option value="Багаутдинов Амир Артурович">Багаутдинов Амир Артурович</option>
+                <option value="Булкина Варвара Константиновна">Булкина Варвара Константиновна</option>
+                <option value="Валиев Камиль Ильнарович">Валиев Камиль Ильнарович</option>
+                <option value="Галиева Эмилия Арсеньевна">Галиева Эмилия Арсеньевна</option>
+                <option value="Залялов Данияр Данисович">Залялов Данияр Данисович</option>
+                <option value="Захаров Раян Владимирович">Захаров Раян Владимирович</option>
+                <option value="Зиганшина Алина Ринатовна">Зиганшина Алина Ринатовна</option>
+                <option value="Ибрагимов Тимур Азатович">Ибрагимов Тимур Азатович</option>
+                <option value="Кузманович Весна">Кузманович Весна</option>
+                <option value="Матвеев Артём Максимович">Матвеев Артём Максимович</option>
+                <option value="Матвеева Вероника Романовна">Матвеева Вероника Романовна</option>
+                <option value="Махмутов Даян Айдарович">Махмутов Даян Айдарович</option>
+                <option value="Мухтарова Аиша Ильнаровна">Мухтарова Аиша Ильнаровна</option>
+                <option value="Николаев Глеб Олегович">Николаев Глеб Олегович</option>
+                <option value="Ногманова Диана Маратовна">Ногманова Диана Маратовна</option>
+                <option value="Пронина Виктория Александровна">Пронина Виктория Александровна</option>
+                <option value="Прохоров Мирослав Ильич">Прохоров Мирослав Ильич</option>
+                <option value="Рахматуллина Азалия Фанисовна">Рахматуллина Азалия Фанисовна</option>
+                <option value="Рыбакова Раяна Сергеевна">Рыбакова Раяна Сергеевна</option>
+                <option value="Рыженко Екатерина Дмитриевна">Рыженко Екатерина Дмитриевна</option>
+                <option value="Садриева Аделия Азатовна">Садриева Аделия Азатовна</option>
+                <option value="Саетгареева Елизавета Айдаровна">Саетгареева Елизавета Айдаровна</option>
+                <option value="Сафаргалиева Эсмира Алмазовна">Сафаргалиева Эсмира Алмазовна</option>
+                <option value="Синицин Диас Денисович">Синицин Диас Денисович</option>
+                <option value="Тавбаева Айдарина Хамзовна">Тавбаева Айдарина Хамзовна</option>
+                <option value="Тазиева Аделя Рузалевна">Тазиева Аделя Рузалевна</option>
+                <option value="Тяминов Радмир Эльдарович">Тяминов Радмир Эльдарович</option>
+                <option value="Хайруллина Малика Маратовна">Хайруллина Малика Маратовна</option>
+                <option value="Хакимов Дамир Альбертович">Хакимов Дамир Альбертович</option>
+                <option value="Чеканова Анна Ивановна">Чеканова Анна Ивановна</option>
+                <option value="Шалетин Егор Валерьевич">Шалетин Егор Валерьевич</option>
+                <option value="Шарипов Эмир Рустемович">Шарипов Эмир Рустемович</option>
+                <option value="Шёнфельд Арсений">Шёнфельд Арсений</option>
+            </select>
 
             <div id="activitiesContainer">
-                <div class="activity-block clearfix">
-                    <label>Название кружка/секции:</label>
-                    <input type="text" class="act-name" required placeholder="Например: Робототехника">
-
-                    <label>День недели:</label>
-                    <select class="act-day">
-                        <option value="Понедельник">Понедельник</option>
-                        <option value="Вторник">Вторник</option>
-                        <option value="Среда">Среда</option>
-                        <option value="Четверг">Четверг</option>
-                        <option value="Пятница">Пятница</option>
-                        <option value="Суббота">Суббота</option>
-                        <option value="Воскресенье">Воскресенье</option>
-                    </select>
-
-                    <label>Время проведения:</label>
-                    <div class="time-container">
-                        <div class="time-field">
-                            <label>Начало:</label>
-                            <input type="time" class="act-time-start" required>
-                        </div>
-                        <div class="time-field">
-                            <label>Окончание:</label>
-                            <input type="time" class="act-time-end" required>
-                        </div>
-                    </div>
-                </div>
+                <!-- Контейнер для кружков (основной блок загрузится через JavaScript ниже) -->
             </div>
 
             <button type="button" class="add-btn" onclick="addActivity()">+ Добавить еще кружок</button>
@@ -162,14 +182,22 @@
     <script>
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7DhiolXlYSY1gGMaOxJ2NjTDD0FAwAu4z3VrUgsIxgdov7MCpMugOIAyxgFg2csbG1A/exec';
 
-        function addActivity() {
-            const container = document.getElementById('activitiesContainer');
-            const block = document.createElement('div');
-            block.className = 'activity-block clearfix';
-            block.innerHTML = `
-                <button type="button" class="remove-btn" onclick="this.parentElement.remove()">✕ Удалить</button>
+        // Генерируем опции для часов (с 08 до 21) и минут (каждые 5 минут)
+        const hOpts = [8,9,10,11,12,13,14,15,16,17,18,19,20,21].map(h => {
+            let val = h < 10 ? '0'+h : h;
+            return `<option value="${val}">${val}</option>`;
+        }).join('');
+        
+        const mOpts = ['00','05','10','15','20','25','30','35','40','45','50','55'].map(m => {
+            return `<option value="${m}">${m}</option>`;
+        }).join('');
+
+        // HTML-шаблон для одного блока с кружком
+        function getActivityHTML(isFirst) {
+            return `
+                ${isFirst ? '' : '<button type="button" class="remove-btn" onclick="this.parentElement.remove()">✕ Удалить</button>'}
                 <label>Название кружка/секции:</label>
-                <input type="text" class="act-name" required placeholder="Например: Бассейн">
+                <input type="text" class="act-name" required placeholder="Например: Робототехника">
                 
                 <label>День недели:</label>
                 <select class="act-day">
@@ -183,17 +211,35 @@
                 </select>
 
                 <label>Время проведения:</label>
-                <div class="time-container">
-                    <div class="time-field">
-                        <label>Начало:</label>
-                        <input type="time" class="act-time-start" required>
+                <div class="time-wrapper">
+                    <div class="time-box">
+                        <span>С</span>
+                        <select class="act-h-start">${hOpts}</select>
+                        <span>:</span>
+                        <select class="act-m-start">${mOpts}</select>
                     </div>
-                    <div class="time-field">
-                        <label>Окончание:</label>
-                        <input type="time" class="act-time-end" required>
+                    <div class="time-box">
+                        <span>ДО</span>
+                        <select class="act-h-end">${hOpts}</select>
+                        <span>:</span>
+                        <select class="act-m-end">${mOpts}</select>
                     </div>
                 </div>
             `;
+        }
+
+        // При загрузке страницы добавляем первый блок
+        document.getElementById('activitiesContainer').innerHTML = `
+            <div class="activity-block clearfix">
+                ${getActivityHTML(true)}
+            </div>
+        `;
+
+        function addActivity() {
+            const container = document.getElementById('activitiesContainer');
+            const block = document.createElement('div');
+            block.className = 'activity-block clearfix';
+            block.innerHTML = getActivityHTML(false);
             container.appendChild(block);
         }
 
@@ -210,10 +256,12 @@
             const activities = [];
 
             blocks.forEach(block => {
-                // Склеиваем время начала и конца в одну строку
-                const timeStart = block.querySelector('.act-time-start').value;
-                const timeEnd = block.querySelector('.act-time-end').value;
-                const fullTime = timeStart + ' - ' + timeEnd;
+                // Склеиваем часы и минуты
+                const hs = block.querySelector('.act-h-start').value;
+                const ms = block.querySelector('.act-m-start').value;
+                const he = block.querySelector('.act-h-end').value;
+                const me = block.querySelector('.act-m-end').value;
+                const fullTime = `${hs}:${ms} - ${he}:${me}`;
 
                 activities.push({
                     name: block.querySelector('.act-name').value,
@@ -234,12 +282,11 @@
                 if(result.result === 'success') {
                     alert('Данные успешно отправлены! Спасибо.');
                     document.getElementById('surveyForm').reset();
-                    
-                    const firstBlock = document.querySelector('.activity-block');
-                    document.getElementById('activitiesContainer').innerHTML = '';
-                    document.getElementById('activitiesContainer').appendChild(firstBlock);
-                    const removeBtn = firstBlock.querySelector('.remove-btn');
-                    if (removeBtn) removeBtn.remove();
+                    document.getElementById('activitiesContainer').innerHTML = `
+                        <div class="activity-block clearfix">
+                            ${getActivityHTML(true)}
+                        </div>
+                    `;
                 } else {
                     alert('Произошла ошибка при отправке.');
                 }
