@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Опрос: Кружки и секции</title>
     <style>
-        /* Общий фон страницы */
         body { 
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
             background-color: #f0f2f5; 
@@ -14,7 +13,6 @@
             display: flex;
             justify-content: center;
         }
-        /* Красивая белая карточка по центру */
         .form-container {
             background: #ffffff;
             padding: 25px 30px;
@@ -37,7 +35,6 @@
             color: #444;
             font-size: 14px;
         }
-        /* Удобные большие поля для телефонов (шрифт 16px спасает от автозума на iPhone) */
         input, select { 
             width: 100%; 
             padding: 12px 15px; 
@@ -54,7 +51,6 @@
             border-color: #008CBA;
             background-color: #fff;
         }
-        /* Блок отдельного кружка */
         .activity-block { 
             border: 1px solid #e1e4e8; 
             padding: 20px; 
@@ -62,7 +58,22 @@
             border-radius: 10px; 
             background: #f8f9fa; 
         }
-        /* Общие стили кнопок */
+        
+        /* Стили для двойного поля времени */
+        .time-container {
+            display: flex;
+            gap: 15px;
+        }
+        .time-field {
+            flex: 1;
+        }
+        .time-field label {
+            margin-top: 5px;
+            font-weight: normal;
+            font-size: 13px;
+            color: #666;
+        }
+
         button { 
             width: 100%; 
             padding: 15px; 
@@ -91,18 +102,17 @@
         }
         .remove-btn:hover { background: #e60000; }
         
-        /* Очистка обтекания для кнопки удаления */
         .clearfix::after {
             content: "";
             clear: both;
             display: table;
         }
 
-        /* Адаптация для совсем узких экранов телефонов */
         @media (max-width: 480px) {
             .form-container { padding: 20px 15px; }
             h2 { font-size: 20px; }
             input, select, button { font-size: 16px; }
+            .time-container { gap: 10px; }
         }
     </style>
 </head>
@@ -115,7 +125,6 @@
             <input type="text" id="childName" required placeholder="Например: Иванов Петя">
 
             <div id="activitiesContainer">
-                <!-- Блок одного кружка -->
                 <div class="activity-block clearfix">
                     <label>Название кружка/секции:</label>
                     <input type="text" class="act-name" required placeholder="Например: Робототехника">
@@ -131,8 +140,17 @@
                         <option value="Воскресенье">Воскресенье</option>
                     </select>
 
-                    <label>Время (со скольки до скольки):</label>
-                    <input type="text" class="act-time" required placeholder="Например: 15:00 - 16:30">
+                    <label>Время проведения:</label>
+                    <div class="time-container">
+                        <div class="time-field">
+                            <label>Начало:</label>
+                            <input type="time" class="act-time-start" required>
+                        </div>
+                        <div class="time-field">
+                            <label>Окончание:</label>
+                            <input type="time" class="act-time-end" required>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -142,10 +160,8 @@
     </div>
 
     <script>
-        // Ваша ссылка скрипта
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7DhiolXlYSY1gGMaOxJ2NjTDD0FAwAu4z3VrUgsIxgdov7MCpMugOIAyxgFg2csbG1A/exec';
 
-        // Функция добавления нового блока кружка
         function addActivity() {
             const container = document.getElementById('activitiesContainer');
             const block = document.createElement('div');
@@ -166,13 +182,21 @@
                     <option value="Воскресенье">Воскресенье</option>
                 </select>
 
-                <label>Время (со скольки до скольки):</label>
-                <input type="text" class="act-time" required placeholder="Например: 15:00 - 16:30">
+                <label>Время проведения:</label>
+                <div class="time-container">
+                    <div class="time-field">
+                        <label>Начало:</label>
+                        <input type="time" class="act-time-start" required>
+                    </div>
+                    <div class="time-field">
+                        <label>Окончание:</label>
+                        <input type="time" class="act-time-end" required>
+                    </div>
+                </div>
             `;
             container.appendChild(block);
         }
 
-        // Функция отправки данных
         document.getElementById('surveyForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -186,10 +210,15 @@
             const activities = [];
 
             blocks.forEach(block => {
+                // Склеиваем время начала и конца в одну строку
+                const timeStart = block.querySelector('.act-time-start').value;
+                const timeEnd = block.querySelector('.act-time-end').value;
+                const fullTime = timeStart + ' - ' + timeEnd;
+
                 activities.push({
                     name: block.querySelector('.act-name').value,
                     day: block.querySelector('.act-day').value,
-                    time: block.querySelector('.act-time').value
+                    time: fullTime
                 });
             });
 
@@ -205,12 +234,12 @@
                 if(result.result === 'success') {
                     alert('Данные успешно отправлены! Спасибо.');
                     document.getElementById('surveyForm').reset();
-                    // Оставляем только первый блок и очищаем остальные
+                    
                     const firstBlock = document.querySelector('.activity-block');
                     document.getElementById('activitiesContainer').innerHTML = '';
                     document.getElementById('activitiesContainer').appendChild(firstBlock);
                     const removeBtn = firstBlock.querySelector('.remove-btn');
-                    if (removeBtn) removeBtn.remove(); // убираем кнопку удаления у первого блока
+                    if (removeBtn) removeBtn.remove();
                 } else {
                     alert('Произошла ошибка при отправке.');
                 }
